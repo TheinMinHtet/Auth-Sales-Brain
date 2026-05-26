@@ -79,8 +79,9 @@ function AuthCallbackHandler() {
           router.replace(next);
           router.refresh();
         } else {
+          const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
           setMessage(
-            "Sign-in did not complete. In Supabase → Authentication → URL Configuration, add: http://localhost:3000/auth/callback"
+            `Sign-in did not complete. Please ensure that ${origin}/auth/callback is added to your Redirect URLs in the Supabase Dashboard.`
           );
         }
       }, 3000);
