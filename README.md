@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Shop Bot Platform
 
-## Getting Started
+Multi-tenant SaaS: shop owners get a public `/shop/{shopId}` link + AI chatbot. **Supabase** handles auth and Postgres; deploy on **Vercel**.
 
-First, run the development server:
+## Supabase only (auth + database)
+
+Use **one** Supabase project. See [`.env.example`](.env.example) and [`SUPABASE_AUTH.md`](SUPABASE_AUTH.md).
 
 ```bash
+cp .env.example .env
+# Fill Supabase API keys + DATABASE_URL + DIRECT_URL from dashboard
+npm install
+npm run db:push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Shop link — which files?
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+See **[`DEPLOY_AND_LINKS.md`](DEPLOY_AND_LINKS.md)** (share with your team).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | Role |
+|------|------|
+| `src/lib/shop-id.ts` | Generate ID + build URL |
+| `src/app/api/shops/setup/route.ts` | Save shop, return `publicUrl` |
+| `src/app/setup/page.tsx` | Owner setup UI |
+| `src/app/shop/[shopId]/page.tsx` | Customer storefront |
 
-## Learn More
+## Vercel
 
-To learn more about Next.js, take a look at the following resources:
+Import repo → add env vars from `.env.example` → set `NEXT_PUBLIC_APP_URL` to your Vercel domain. Details: [`DEPLOY_AND_LINKS.md`](DEPLOY_AND_LINKS.md).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
