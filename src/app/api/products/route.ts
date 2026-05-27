@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthFromRequest, unauthorized, forbidden } from "@/lib/api-auth";
 import { productSchema } from "@/lib/validations";
 import { buildSystemPrompt } from "@/lib/ai/context";
+import { syncShopKnowledgeBase } from "@/lib/ai/knowledge";
 
 async function getOwnerShop(userId: string) {
   return prisma.shop.findUnique({
@@ -37,6 +38,9 @@ export async function POST(request: NextRequest) {
     data: {
       botSystemPrompt: buildSystemPrompt({ ...shop, products }),
     },
+  });
+  await syncShopKnowledgeBase(shop.shopId).catch((error) => {
+    console.error("Knowledge sync failed after product create:", error);
   });
 
   return NextResponse.json({ product });

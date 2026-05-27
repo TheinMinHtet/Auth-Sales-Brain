@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
     const reply = await generateBotReply(
       { ...shop, products: shop.products },
       history,
-      message
+      message,
+      sessionId
     );
 
     await prisma.chatMessage.create({

@@ -1,104 +1,103 @@
-import { buildSystemPrompt, type ShopWithProducts } from "./context";
+import { buildAgentSystemInstruction } from "./context";
+import {
+  extractFunctionCalls,
+  extractTextFromCandidate,
+  generateGeminiContent,
+  type GeminiContent,
+} from "./gemini";
+import {
+  buildRetrievedContext,
+  isProductRelatedQuestion,
+  retrieveRelevantKnowledge,
+  syncShopKnowledgeBaseFromRecord,
+  type ShopWithProducts,
+} from "./knowledge";
+import { SALES_AGENT_TOOLS, runSalesAgentTool } from "./tools";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-/** Context-based reply without external API */
-function contextFallback(
-  shop: ShopWithProducts,
-  userMessage: string
-): string {
-  const lower = userMessage.toLowerCase();
-  const products = shop.products.filter((p) => p.isActive);
-
-  if (/product|menu|catalog|what do you sell|list/i.test(lower)) {
-    if (products.length === 0) {
-      return `Welcome to ${shop.businessName}! We're still updating our catalog. Check back soon.`;
-    }
-    const list = products
-      .map((p) => `• ${p.name} — $${p.price.toFixed(2)}`)
-      .join("\n");
-    return `Here are our products at ${shop.businessName}:\n\n${list}\n\nAsk about any item for more details!`;
-  }
-
-  if (/payment|pay|card|cash/i.test(lower)) {
-    return `Payment info: ${shop.paymentInfo}`;
-  }
-
-  if (/deliver|shipping|ship|pickup/i.test(lower)) {
-    return `Delivery info: ${shop.deliveryInfo}`;
-  }
-
-  if (/faq|question|help/i.test(lower) && shop.faq) {
-    return shop.faq;
-  }
-
-  if (/policy|return|refund/i.test(lower) && shop.policies) {
-    return shop.policies;
-  }
-
-  for (const p of products) {
-    if (lower.includes(p.name.toLowerCase())) {
-      return `${p.name}: $${p.price.toFixed(2)}. ${
-        p.description || "No additional description."
-      } ${p.stock > 0 ? `${p.stock} available.` : "Currently out of stock."}`;
-    }
-  }
-
-  return `Thanks for visiting ${shop.businessName}! I can help with products, payment (${shop.paymentInfo.slice(0, 50)}...), and delivery. What would you like to know?`;
+function contextFallback(): string {
+  return "I don't have enough information";
 }
 
-/** Generate AI response using OpenAI if configured, else context-based bot */
+function toGeminiHistory(history: ChatMessage[], userMessage: string): GeminiContent[] {
+  const priorTurns = history.slice(-10).map<GeminiContent>((message) => ({
+    role: message.role === "assistant" ? "model" : "user",
+    parts: [{ text: message.content }],
+  }));
+
+  return [...priorTurns, { role: "user", parts: [{ text: userMessage }] }];
+}
+
 export async function generateBotReply(
   shop: ShopWithProducts,
   history: ChatMessage[],
-  userMessage: string
+  userMessage: string,
+  sessionId: string
 ): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return contextFallback(shop, userMessage);
-  }
-
   try {
-    const systemPrompt = buildSystemPrompt(shop);
-    const messages = [
-      { role: "system" as const, content: systemPrompt },
-      ...history.slice(-10).map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-      { role: "user" as const, content: userMessage },
-    ];
+    let retrieved = await retrieveRelevantKnowledge(shop.shopId, userMessage, 5).catch(
+      () => []
+    );
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!res.ok) {
-      return contextFallback(shop, userMessage);
+    if (!retrieved.length) {
+      await syncShopKnowledgeBaseFromRecord(shop).catch(() => undefined);
+      retrieved = await retrieveRelevantKnowledge(shop.shopId, userMessage, 5).catch(
+        () => []
+      );
     }
 
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    return (
-      data.choices?.[0]?.message?.content?.trim() ||
-      contextFallback(shop, userMessage)
+    if (isProductRelatedQuestion(shop, userMessage) && !retrieved.length) {
+      return "I don't have enough information";
+    }
+
+    const systemInstruction = buildAgentSystemInstruction(
+      shop,
+      buildRetrievedContext(retrieved)
     );
+
+    let contents = toGeminiHistory(history, userMessage);
+
+    for (let round = 0; round < 3; round += 1) {
+      const response = await generateGeminiContent({
+        systemInstruction,
+        contents,
+        tools: SALES_AGENT_TOOLS,
+      });
+
+      const candidate = response.candidates?.[0];
+      const functionCalls = extractFunctionCalls(candidate);
+      const text = extractTextFromCandidate(candidate);
+
+      if (!functionCalls.length) {
+        return text || contextFallback();
+      }
+
+      const functionResponses = await Promise.all(
+        functionCalls.map(async (call) => ({
+          functionResponse: {
+            id: call.id,
+            name: call.name,
+            response: await runSalesAgentTool(call.name, call.args, {
+              shop,
+              userId: sessionId,
+            }),
+          },
+        }))
+      );
+
+      contents = [
+        ...contents,
+        ...(candidate?.content ? [candidate.content] : []),
+        { role: "user", parts: functionResponses },
+      ];
+    }
+
+    return contextFallback();
   } catch {
-    return contextFallback(shop, userMessage);
+    return contextFallback();
   }
 }

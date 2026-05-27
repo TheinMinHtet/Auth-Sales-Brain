@@ -4,6 +4,7 @@ import { getAuthFromRequest, unauthorized, forbidden } from "@/lib/api-auth";
 import { shopSetupSchema } from "@/lib/validations";
 import { generateShopId, buildShopPublicUrl } from "@/lib/shop-id";
 import { buildSystemPrompt } from "@/lib/ai/context";
+import { syncShopKnowledgeBaseFromRecord } from "@/lib/ai/knowledge";
 
 /**
  * Shop setup — generates unique shopId and public link on submission.
@@ -71,6 +72,10 @@ export async function POST(request: NextRequest) {
         data: { botSystemPrompt: systemPrompt },
         include: { products: true },
       });
+    });
+
+    await syncShopKnowledgeBaseFromRecord(shop).catch((error) => {
+      console.error("Knowledge sync failed after shop setup:", error);
     });
 
     const publicUrl = buildShopPublicUrl(shop.shopId);

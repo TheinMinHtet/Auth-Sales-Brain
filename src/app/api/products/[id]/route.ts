@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthFromRequest, unauthorized, forbidden } from "@/lib/api-auth";
 import { productSchema } from "@/lib/validations";
 import { buildSystemPrompt } from "@/lib/ai/context";
+import { syncShopKnowledgeBase } from "@/lib/ai/knowledge";
 
 export async function PATCH(
   request: NextRequest,
@@ -42,6 +43,9 @@ export async function PATCH(
       where: { id: shop.id },
       data: { botSystemPrompt: buildSystemPrompt(shop) },
     });
+    await syncShopKnowledgeBase(shop.shopId).catch((error) => {
+      console.error("Knowledge sync failed after product update:", error);
+    });
   }
 
   return NextResponse.json({ product: updated });
@@ -66,5 +70,8 @@ export async function DELETE(
   }
 
   await prisma.product.delete({ where: { id } });
+  await syncShopKnowledgeBase(product.shop.shopId).catch((error) => {
+    console.error("Knowledge sync failed after product delete:", error);
+  });
   return NextResponse.json({ success: true });
 }

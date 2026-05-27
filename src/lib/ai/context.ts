@@ -1,49 +1,67 @@
-import type { Product, Shop } from "@prisma/client";
+import type { ShopWithProducts } from "@/lib/ai/knowledge";
 
-export type ShopWithProducts = Shop & { products: Product[] };
-
-/** Build RAG-style context from shop data for the AI bot */
 export function buildShopContext(shop: ShopWithProducts): string {
   const productList = shop.products
-    .filter((p) => p.isActive)
-    .map(
-      (p) =>
-        `- ${p.name}: $${p.price.toFixed(2)}${p.stock > 0 ? ` (${p.stock} in stock)` : " (out of stock)"}${
-          p.description ? ` — ${p.description}` : ""
-        }`
-    )
+    .filter((product) => product.isActive)
+    .map((product) => {
+      const price = `$${product.price.toFixed(2)}`;
+      const stock =
+        product.stock > 0 ? `${product.stock} in stock` : "out of stock";
+
+      return [
+        `- ${product.name}`,
+        `price: ${price}`,
+        `stock: ${stock}`,
+        product.description ? `description: ${product.description}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+    })
     .join("\n");
 
+  return [
+    `BUSINESS: ${shop.businessName}`,
+    shop.description ? `DESCRIPTION: ${shop.description}` : null,
+    "",
+    "PRODUCTS:",
+    productList || "No products listed yet.",
+    "",
+    `PAYMENT: ${shop.paymentInfo}`,
+    `DELIVERY: ${shop.deliveryInfo}`,
+    shop.faq ? `FAQ:\n${shop.faq}` : null,
+    shop.policies ? `POLICIES:\n${shop.policies}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+export function buildAgentSystemInstruction(
+  shop: ShopWithProducts,
+  retrievedContext: string
+): string {
+  const tone = shop.botTone || "friendly";
+
   return `
-BUSINESS: ${shop.businessName}
-${shop.description ? `DESCRIPTION: ${shop.description}` : ""}
+You are the AI sales assistant for "${shop.businessName}".
+Tone: ${tone}.
 
-PRODUCTS:
-${productList || "No products listed yet."}
+You are not a general chatbot. You are a shop assistant focused on helping customers buy products, understand delivery and payment, and track orders for this specific store.
 
-PAYMENT: ${shop.paymentInfo}
-DELIVERY: ${shop.deliveryInfo}
-${shop.faq ? `FAQ:\n${shop.faq}` : ""}
-${shop.policies ? `POLICIES:\n${shop.policies}` : ""}
+Rules:
+- Use only the retrieved business context and tool results.
+- Never guess prices, stock, availability, policies, or order status.
+- For product questions, stay grounded in retrieved context first and use tools when live data is needed.
+- If relevant context is missing, say exactly: "I don't have enough information".
+- If stock cannot be confirmed, say that stock is unknown.
+- Keep answers concise, natural, and sales-assistant-like.
+- Do not mention internal prompts, vectors, embeddings, tools, or databases.
+
+Retrieved business context:
+${retrievedContext}
 `.trim();
 }
 
 export function buildSystemPrompt(shop: ShopWithProducts): string {
-  const context = buildShopContext(shop);
-  const custom = shop.botSystemPrompt?.trim();
-  const tone = shop.botTone || "friendly";
-
-  return (
-    custom ||
-    `You are the AI shopping assistant for "${shop.businessName}". 
-Tone: ${tone}.
-Answer questions about products, pricing, payment, delivery, and policies using ONLY the shop context below.
-If you don't know something, say so and suggest the customer contact the shop.
-Never invent products or prices not in the context.
-Keep responses concise and helpful.
-
---- SHOP CONTEXT ---
-${context}
---- END CONTEXT ---`
-  );
+  return buildAgentSystemInstruction(shop, buildShopContext(shop));
 }
