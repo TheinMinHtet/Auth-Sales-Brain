@@ -38,10 +38,14 @@ export function ShopChatbot({ shopId, businessName }: ShopChatbotProps) {
     setLoading(true);
 
     try {
+      const payload = sessionId
+        ? { shopId, message: text, sessionId }
+        : { shopId, message: text };
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shopId, message: text, sessionId }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {

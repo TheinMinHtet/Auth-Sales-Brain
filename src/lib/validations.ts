@@ -56,5 +56,5 @@ export const checkoutSchema = z.object({
 export const chatSchema = z.object({
   shopId: z.string().min(1),
   message: z.string().min(1).max(2000),
-  sessionId: z.string().optional(),
+  sessionId: z.string().nullable().optional(),
 });
