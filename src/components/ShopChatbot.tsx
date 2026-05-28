@@ -40,13 +40,6 @@ const MYANMAR_COPY = {
   quickPrompts: "အမြန်မေးခွန်းများ",
   productsTitle: "ရနိုင်သော ပစ္စည်းများ",
   productsHint: "များတဲ့ catalog အတွက် card တွေကို ဘေးတိုက် scroll လုပ်ကြည့်ပါ။",
-  showingProducts: "ပြထားသည်",
-  ofProducts: "ခု / စုစုပေါင်း",
-  moreProducts: "နောက်ထပ် ရှာဖို့",
-  moreProductsHint: "နောက်ထပ် ပစ္စည်းများ ရှိသေးသည်။ စတော့၊ ဘတ်ဂျက်၊ နှိုင်းယှဉ်မှုအလိုက် ရှာနိုင်ပါတယ်။",
-  inStockPrompt: "စတော့ရှိတာတွေ ပြပါ",
-  budgetPrompt: "$20 အောက် ပစ္စည်းတွေ ညွှန်းပါ",
-  comparePrompt: "ပစ္စည်းတွေ နှိုင်းယှဉ်ပေးပါ",
   info: "ဆိုင် info",
   language: "ဘာသာစကား",
   openChat: "Chat ဖွင့်ရန်",
@@ -66,14 +59,6 @@ const ENGLISH_COPY = {
   quickPrompts: "Quick prompts",
   productsTitle: "Available products",
   productsHint: "For larger catalogs, scroll sideways through the cards.",
-  showingProducts: "Showing",
-  ofProducts: "of",
-  moreProducts: "Find more",
-  moreProductsHint:
-    "More products are available. Narrow the catalog by stock, budget, or comparison.",
-  inStockPrompt: "Show what is in stock",
-  budgetPrompt: "Recommend products under $20",
-  comparePrompt: "Compare products",
   info: "Shop info",
   language: "Language",
   openChat: "Open chat",
@@ -100,7 +85,7 @@ export function ShopChatbot({
   const hasStarted = messages.length > 0;
   const copy = language === "en" ? ENGLISH_COPY : MYANMAR_COPY;
 
-  const featuredProducts = useMemo(() => products.slice(0, 6), [products]);
+  const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
 
   useEffect(() => {
     const scrollElement = scrollRef.current;
@@ -269,8 +254,8 @@ export function ShopChatbot({
             {copy.productsTitle}
           </p>
           <p className="text-xs text-slate-500">
-            {copy.productsHint} {copy.showingProducts}{" "}
-            {featuredProducts.length} {copy.ofProducts} {products.length}.
+            {copy.productsHint} Showing {featuredProducts.length} of{" "}
+            {products.length}.
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
@@ -320,49 +305,6 @@ export function ShopChatbot({
             </div>
           </button>
         ))}
-        {products.length > featuredProducts.length && (
-          <div className="flex w-56 shrink-0 flex-col justify-between rounded-2xl border border-dashed border-slate-300 bg-white/80 p-4 shadow-sm">
-            <div>
-              <p className="text-sm font-semibold text-slate-950">
-                {copy.moreProducts}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                {products.length - featuredProducts.length}{" "}
-                {copy.moreProductsHint}
-              </p>
-            </div>
-            <div className="mt-4 space-y-2">
-              {[
-                {
-                  label: copy.inStockPrompt,
-                  message: "Show what is in stock",
-                },
-                {
-                  label: copy.budgetPrompt,
-                  message: "Recommend products under $20",
-                },
-                {
-                  label: copy.comparePrompt,
-                  message: "Compare products",
-                },
-              ].map((prompt) => (
-                <button
-                  key={prompt.message}
-                  type="button"
-                  onClick={() => {
-                    if (language === "my") {
-                      setLanguage("en");
-                    }
-                    void sendMessage(prompt.message);
-                  }}
-                  className="w-full rounded-full bg-slate-950 px-3 py-2 text-left text-xs font-medium text-white transition hover:bg-slate-800"
-                >
-                  {prompt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

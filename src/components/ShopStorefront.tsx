@@ -90,27 +90,27 @@ function ShopInfoPanel({ shop }: { shop: PublicShop }) {
           </div>
           {shop.products.length > visibleProducts.length && (
             <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-500">
-              Showing {visibleProducts.length} of {shop.products.length} products here. Ask by product name, budget, category, or stock to keep browsing fast.
+              Showing {visibleProducts.length} of {shop.products.length} products here. Ask the assistant for a specific product, budget, or category to keep the list easy to browse.
             </p>
           )}
         </section>
-      </div>
 
-      <section className="chat-scrollbar max-h-[34dvh] shrink-0 overflow-y-auto rounded-t-3xl bg-slate-950 px-5 py-5 text-slate-100 shadow-[0_-12px_36px_rgba(15,23,42,0.16)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          Store info
-        </p>
-        <div className="mt-4 space-y-4 text-sm">
-          <div>
-            <p className="text-slate-400">Payment</p>
-            <p className="mt-1 leading-6 text-slate-100">{shop.paymentInfo}</p>
+        <section className="mt-6 rounded-3xl bg-slate-950 px-5 py-5 text-slate-100 shadow-[0_12px_36px_rgba(15,23,42,0.16)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+            Store info
+          </p>
+          <div className="mt-4 space-y-4 text-sm">
+            <div>
+              <p className="text-slate-400">Payment</p>
+              <p className="mt-1 leading-6 text-slate-100">{shop.paymentInfo}</p>
+            </div>
+            <div>
+              <p className="text-slate-400">Delivery</p>
+              <p className="mt-1 leading-6 text-slate-100">{shop.deliveryInfo}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-slate-400">Delivery</p>
-            <p className="mt-1 leading-6 text-slate-100">{shop.deliveryInfo}</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </>
   );
 }
