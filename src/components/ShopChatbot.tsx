@@ -289,10 +289,17 @@ export function ShopChatbot({
   );
 
   const composer = (
-    <div className="mx-auto flex w-full max-w-3xl flex-col rounded-[28px] bg-[#202020] px-4 pb-3 pt-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] sm:px-5">
+    <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[28px] bg-[#202020] px-4 py-3 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px]">
       <textarea
         value={input}
-        onChange={(event) => setInput(event.target.value)}
+        onChange={(event) => {
+          setInput(event.target.value);
+          event.currentTarget.style.height = "0px";
+          event.currentTarget.style.height = `${Math.min(
+            event.currentTarget.scrollHeight,
+            144
+          )}px`;
+        }}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
@@ -300,20 +307,18 @@ export function ShopChatbot({
           }
         }}
         placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
-        rows={2}
-        className="max-h-40 min-h-[70px] w-full resize-none bg-transparent text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
+        rows={1}
+        className="max-h-36 min-h-[44px] flex-1 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
       />
-      <div className="mt-1 flex justify-end">
-        <button
-          type="button"
-          onClick={submitCurrentInput}
-          disabled={loading || !input.trim()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
-          aria-label={copy.send}
-        >
-          ↑
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={submitCurrentInput}
+        disabled={loading || !input.trim()}
+        className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:w-11"
+        aria-label={copy.send}
+      >
+        ↑
+      </button>
     </div>
   );
 
