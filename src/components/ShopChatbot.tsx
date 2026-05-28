@@ -289,7 +289,14 @@ export function ShopChatbot({
   );
 
   const composer = (
-    <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[30px] border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_60px_rgba(15,23,42,0.12)]">
+    <div className="mx-auto flex w-full max-w-3xl items-end gap-3 rounded-[34px] bg-[#202020] px-4 py-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[42px] sm:px-5">
+      <button
+        type="button"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#343434] text-3xl font-light leading-none text-white transition hover:bg-[#3f3f3f]"
+        aria-label="Add attachment"
+      >
+        +
+      </button>
       <textarea
         value={input}
         onChange={(event) => setInput(event.target.value)}
@@ -299,18 +306,34 @@ export function ShopChatbot({
             submitCurrentInput();
           }
         }}
-        placeholder={copy.placeholder}
+        placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
         rows={1}
-        className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-400"
+        className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-0 py-2 text-[19px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[22px]"
       />
+      <button
+        type="button"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#343434] text-white transition hover:bg-[#3f3f3f]"
+        aria-label="Voice input"
+      >
+        <span className="relative h-6 w-4" aria-hidden="true">
+          <span className="absolute left-1/2 top-0 h-4 w-3 -translate-x-1/2 rounded-b-full rounded-t-full border-2 border-white" />
+          <span className="absolute left-1/2 top-3 h-2 w-4 -translate-x-1/2 rounded-b-full border-b-2 border-l-2 border-r-2 border-white" />
+          <span className="absolute bottom-0 left-1/2 h-2 w-0.5 -translate-x-1/2 rounded-full bg-white" />
+        </span>
+      </button>
       <button
         type="button"
         onClick={submitCurrentInput}
         disabled={loading || !input.trim()}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-lg font-semibold leading-none text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
         aria-label={copy.send}
       >
-        ↑
+        <span className="flex h-6 items-center gap-1" aria-hidden="true">
+          <span className="h-3 w-1 rounded-full bg-current" />
+          <span className="h-5 w-1 rounded-full bg-current" />
+          <span className="h-2.5 w-1 rounded-full bg-current" />
+          <span className="h-4 w-1 rounded-full bg-current" />
+        </span>
       </button>
     </div>
   );
