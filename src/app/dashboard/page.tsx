@@ -24,6 +24,10 @@ interface Analytics {
   publicUrl: string;
 }
 
+function buildQrCodeUrl(value: string, size = 144) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+}
+
 export default function DashboardPage() {
   const [shop, setShop] = useState<Shop | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
@@ -162,23 +166,34 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">{shop.businessName}</h1>
           <p className="text-sm text-slate-500 mt-1">Owner dashboard</p>
         </div>
-        <div className="rounded-xl border bg-white px-4 py-3 text-sm max-w-md">
-          <p className="font-medium text-slate-700">Public shop link</p>
-          <a
-            href={shop.publicUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-indigo-600 break-all hover:underline"
-          >
-            {shop.publicUrl}
-          </a>
-          <button
-            type="button"
-            onClick={() => navigator.clipboard.writeText(shop.publicUrl)}
-            className="mt-2 block text-xs text-indigo-600 hover:underline"
-          >
-            Copy link
-          </button>
+        <div className="flex max-w-xl gap-4 rounded-xl border bg-white px-4 py-3 text-sm">
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-slate-700">Public shop link</p>
+            <a
+              href={shop.publicUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="break-all text-indigo-600 hover:underline"
+            >
+              {shop.publicUrl}
+            </a>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(shop.publicUrl)}
+              className="mt-2 block text-xs text-indigo-600 hover:underline"
+            >
+              Copy link
+            </button>
+          </div>
+          <div className="shrink-0 rounded-lg border bg-white p-2">
+            <img
+              src={buildQrCodeUrl(shop.publicUrl)}
+              alt="Public shop QR code"
+              width={144}
+              height={144}
+              className="h-24 w-24 sm:h-36 sm:w-36"
+            />
+          </div>
         </div>
       </div>
 

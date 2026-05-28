@@ -10,6 +10,10 @@ interface ProductRow {
   stock: string;
 }
 
+function buildQrCodeUrl(value: string, size = 180) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+}
+
 export default function SetupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -79,6 +83,18 @@ export default function SetupPage() {
           <code className="mt-4 block break-all rounded-lg bg-slate-100 p-3 text-sm text-indigo-700">
             {publicUrl}
           </code>
+          <div className="mx-auto mt-5 w-fit rounded-2xl border bg-white p-3 shadow-sm">
+            <img
+              src={buildQrCodeUrl(publicUrl)}
+              alt="Public shop QR code"
+              width={180}
+              height={180}
+              className="h-[180px] w-[180px]"
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Customers can scan this QR code to open your shop.
+          </p>
           <button
             type="button"
             onClick={() => {

@@ -202,7 +202,7 @@ export function ShopChatbot({
             <button
               key={prompt}
               type="button"
-              onClick={() => void sendMessage(label)}
+              onClick={() => void sendMessage(prompt)}
               className={`shrink-0 rounded-full border px-3 py-2 text-xs transition ${themeClasses.chip}`}
             >
               {label}
