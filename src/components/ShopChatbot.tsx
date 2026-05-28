@@ -289,14 +289,7 @@ export function ShopChatbot({
   );
 
   const composer = (
-    <div className="mx-auto flex w-full max-w-3xl items-end gap-3 rounded-[34px] bg-[#202020] px-4 py-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[42px] sm:px-5">
-      <button
-        type="button"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#343434] text-3xl font-light leading-none text-white transition hover:bg-[#3f3f3f]"
-        aria-label="Add attachment"
-      >
-        +
-      </button>
+    <div className="mx-auto flex w-full max-w-3xl flex-col rounded-[28px] bg-[#202020] px-4 pb-3 pt-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] sm:px-5">
       <textarea
         value={input}
         onChange={(event) => setInput(event.target.value)}
@@ -307,34 +300,20 @@ export function ShopChatbot({
           }
         }}
         placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
-        rows={1}
-        className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-0 py-2 text-[19px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[22px]"
+        rows={2}
+        className="max-h-40 min-h-[70px] w-full resize-none bg-transparent text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
       />
-      <button
-        type="button"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#343434] text-white transition hover:bg-[#3f3f3f]"
-        aria-label="Voice input"
-      >
-        <span className="relative h-6 w-4" aria-hidden="true">
-          <span className="absolute left-1/2 top-0 h-4 w-3 -translate-x-1/2 rounded-b-full rounded-t-full border-2 border-white" />
-          <span className="absolute left-1/2 top-3 h-2 w-4 -translate-x-1/2 rounded-b-full border-b-2 border-l-2 border-r-2 border-white" />
-          <span className="absolute bottom-0 left-1/2 h-2 w-0.5 -translate-x-1/2 rounded-full bg-white" />
-        </span>
-      </button>
-      <button
-        type="button"
-        onClick={submitCurrentInput}
-        disabled={loading || !input.trim()}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
-        aria-label={copy.send}
-      >
-        <span className="flex h-6 items-center gap-1" aria-hidden="true">
-          <span className="h-3 w-1 rounded-full bg-current" />
-          <span className="h-5 w-1 rounded-full bg-current" />
-          <span className="h-2.5 w-1 rounded-full bg-current" />
-          <span className="h-4 w-1 rounded-full bg-current" />
-        </span>
-      </button>
+      <div className="mt-1 flex justify-end">
+        <button
+          type="button"
+          onClick={submitCurrentInput}
+          disabled={loading || !input.trim()}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
+          aria-label={copy.send}
+        >
+          ↑
+        </button>
+      </div>
     </div>
   );
 
@@ -347,9 +326,14 @@ export function ShopChatbot({
               <button
                 type="button"
                 onClick={onOpenInfo}
-                className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden"
+                aria-label={copy.info}
               >
-                {copy.info}
+                <span className="flex flex-col gap-1" aria-hidden="true">
+                  <span className="h-0.5 w-4 rounded-full bg-current" />
+                  <span className="h-0.5 w-4 rounded-full bg-current" />
+                  <span className="h-0.5 w-4 rounded-full bg-current" />
+                </span>
               </button>
             )}
             <div className="min-w-0">
