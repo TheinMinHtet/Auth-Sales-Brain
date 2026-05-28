@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+}
+
+interface ChatProduct {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  imageUrl: string | null;
+  stock: number;
 }
 
 interface ShopChatbotProps {
@@ -12,29 +21,48 @@ interface ShopChatbotProps {
   businessName: string;
   fullPage?: boolean;
   suggestedPrompts?: string[];
+  products?: ChatProduct[];
+  onOpenInfo?: () => void;
 }
 
-type Theme = "light" | "dark";
 type Language = "en" | "my";
 
 const MYANMAR_COPY = {
   eyebrow: "AI အရောင်း Chat",
   online: "အွန်လိုင်း",
-  helper:
-    "ပစ္စည်း၊ ပို့ဆောင်မှု၊ ငွေပေးချေမှု၊ စတော့ အကြောင်း မေးနိုင်ပါတယ်။",
-  placeholder:
-    "ဆိုင် assistant ကို စာပို့ပါ...",
-  send: "ပို့မယ်",
+  greeting: "ဘာရှာပေးရမလဲ?",
+  helper: "ပစ္စည်း၊ ပို့ဆောင်မှု၊ ငွေပေးချေမှု၊ စတော့ အကြောင်း မေးနိုင်ပါတယ်။",
+  placeholder: "ဆိုင် assistant ကို စာပို့ပါ...",
+  send: "ပို့",
   thinking: "စဉ်းစားနေပါတယ်...",
-  error:
-    "တုံ့ပြန်လို့မရပါဘူး။ ထပ်စမ်းကြည့်ပါ။",
-  connectionError:
-    "ချိတ်ဆက်မှု ပြဿနာရှိပါတယ်။ ထပ်စမ်းကြည့်ပါ။",
+  error: "တုံ့ပြန်လို့မရပါဘူး။ ထပ်စမ်းကြည့်ပါ။",
+  connectionError: "ချိတ်ဆက်မှု ပြဿနာရှိပါတယ်။ ထပ်စမ်းကြည့်ပါ။",
   quickPrompts: "အမြန်မေးခွန်းများ",
+  productsTitle: "ရနိုင်သော ပစ္စည်းများ",
+  productsHint: "များတဲ့ catalog အတွက် card တွေကို ဘေးတိုက် scroll လုပ်ကြည့်ပါ။",
+  info: "ဆိုင် info",
+  language: "ဘာသာစကား",
   openChat: "Chat ဖွင့်ရန်",
   closeChat: "Chat ပိတ်ရန်",
-  theme: "အရောင်",
-  language: "ဘာသာ",
+};
+
+const ENGLISH_COPY = {
+  eyebrow: "AI Sales Chat",
+  online: "Online",
+  greeting: "What can I help you find?",
+  helper: "Ask about products, delivery, payment, or stock.",
+  placeholder: "Message the shop assistant...",
+  send: "Send",
+  thinking: "Thinking...",
+  error: "Sorry, I couldn't respond. Try again.",
+  connectionError: "Connection error. Please try again.",
+  quickPrompts: "Quick prompts",
+  productsTitle: "Available products",
+  productsHint: "For larger catalogs, scroll sideways through the cards.",
+  info: "Shop info",
+  language: "Language",
+  openChat: "Open chat",
+  closeChat: "Close chat",
 };
 
 export function ShopChatbot({
@@ -42,78 +70,31 @@ export function ShopChatbot({
   businessName,
   fullPage = false,
   suggestedPrompts = [],
+  products = [],
+  onOpenInfo,
 }: ShopChatbotProps) {
   const [open, setOpen] = useState(fullPage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<Theme>("light");
   const [language, setLanguage] = useState<Language>("en");
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const hasStarted = messages.length > 0;
+  const copy = language === "en" ? ENGLISH_COPY : MYANMAR_COPY;
 
-  const copy =
-    language === "en"
-      ? {
-          eyebrow: "AI Sales Chat",
-          online: "Online",
-          greeting: `Hi! I'm the AI assistant for ${businessName}.`,
-          helper: "Ask me about products, delivery, payment, or stock.",
-          placeholder: "Message the shop assistant...",
-          send: "Send",
-          thinking: "Thinking...",
-          error: "Sorry, I couldn't respond. Try again.",
-          connectionError: "Connection error. Please try again.",
-          quickPrompts: "Quick prompts",
-          openChat: "Open chat",
-          closeChat: "Close chat",
-          theme: "Theme",
-          language: "Language",
-        }
-      : {
-          ...MYANMAR_COPY,
-          greeting: `${businessName} အတွက် AI အကူအညီပါ။`,
-        };
-
-  const themeClasses =
-    theme === "dark"
-      ? {
-          shell: "bg-zinc-950 text-zinc-100",
-          border: "border-zinc-800",
-          muted: "text-zinc-400",
-          strong: "text-zinc-50",
-          panel: "bg-zinc-900/92",
-          panelSoft: "bg-zinc-900/80",
-          chip: "border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800",
-          assistant: "border border-zinc-800 bg-zinc-900 text-zinc-100",
-          user: "bg-white text-zinc-950",
-          composer:
-            "border-zinc-700 bg-zinc-900/96 shadow-[0_20px_80px_rgba(0,0,0,0.28)]",
-          input: "text-zinc-50 placeholder:text-zinc-500",
-          send: "bg-white text-zinc-950 hover:bg-zinc-200",
-          ghost: "border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800",
-        }
-      : {
-          shell: "bg-white text-slate-950",
-          border: "border-slate-200",
-          muted: "text-slate-500",
-          strong: "text-slate-950",
-          panel: "bg-white/92",
-          panelSoft: "bg-slate-50/90",
-          chip:
-            "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
-          assistant: "border border-slate-200 bg-white text-slate-800",
-          user: "bg-slate-950 text-white",
-          composer:
-            "border-slate-200 bg-white/96 shadow-[0_20px_80px_rgba(15,23,42,0.12)]",
-          input: "text-slate-950 placeholder:text-slate-400",
-          send: "bg-slate-950 text-white hover:bg-slate-800",
-          ghost: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-        };
+  const featuredProducts = useMemo(() => products.slice(0, 24), [products]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    requestAnimationFrame(() => {
+      scrollElement.scrollTo({
+        top: scrollElement.scrollHeight,
+        behavior: "smooth",
+      });
+    });
   }, [messages, loading]);
 
   function localizePrompt(prompt: string) {
@@ -141,6 +122,24 @@ export function ShopChatbot({
     }
 
     return prompt;
+  }
+
+  function shouldShowProductCards(index: number) {
+    if (!featuredProducts.length || messages[index]?.role !== "assistant") {
+      return false;
+    }
+
+    const previousUserMessage = [...messages]
+      .slice(0, index)
+      .reverse()
+      .find((message) => message.role === "user")?.content;
+
+    return Boolean(
+      previousUserMessage &&
+        /(what products|products do you sell|catalog|show.*products|recommend|available products|ဘာပစ္စည်း|ပစ္စည်း)/i.test(
+          previousUserMessage
+        )
+    );
   }
 
   async function sendMessage(text: string) {
@@ -189,34 +188,108 @@ export function ShopChatbot({
     void sendMessage(input);
   }
 
+  const languageToggle = (
+    <div
+      className="grid grid-cols-2 rounded-full border border-slate-200 bg-slate-100 p-1 text-xs font-semibold"
+      aria-label={copy.language}
+    >
+      {(["en", "my"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => setLanguage(option)}
+          className={`rounded-full px-3 py-1.5 transition ${
+            language === option
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {option === "en" ? "EN" : "မြန်"}
+        </button>
+      ))}
+    </div>
+  );
+
   const promptBar = suggestedPrompts.length > 0 && (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-1">
-      <p className={`text-xs font-medium ${themeClasses.muted}`}>
-        {copy.quickPrompts}
-      </p>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {suggestedPrompts.map((prompt) => {
-          const label = localizePrompt(prompt);
+      <p className="text-xs font-medium text-slate-500">{copy.quickPrompts}</p>
+      <div className="chat-scrollbar flex gap-2 overflow-x-auto pb-1">
+        {suggestedPrompts.map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => void sendMessage(prompt)}
+            className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            {localizePrompt(prompt)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
-          return (
-            <button
-              key={prompt}
-              type="button"
-              onClick={() => void sendMessage(prompt)}
-              className={`shrink-0 rounded-full border px-3 py-2 text-xs transition ${themeClasses.chip}`}
-            >
-              {label}
-            </button>
-          );
-        })}
+  const productCards = (
+    <div className="mt-3 w-full max-w-full">
+      <div className="mb-2 flex items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">
+            {copy.productsTitle}
+          </p>
+          <p className="text-xs text-slate-500">{copy.productsHint}</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+          {products.length}
+        </span>
+      </div>
+      <div className="chat-scrollbar flex gap-3 overflow-x-auto pb-2">
+        {featuredProducts.map((product) => (
+          <button
+            key={product.id}
+            type="button"
+            onClick={() => void sendMessage(`Tell me about ${product.name}`)}
+            className="w-52 shrink-0 rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+          >
+            <div className="flex h-24 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="px-3 text-center text-xs font-medium text-slate-500">
+                  {product.name}
+                </span>
+              )}
+            </div>
+            <p className="mt-3 line-clamp-1 text-sm font-semibold text-slate-950">
+              {product.name}
+            </p>
+            <p className="mt-1 line-clamp-2 min-h-9 text-xs leading-5 text-slate-500">
+              {product.description || "Ask for details, price, and stock."}
+            </p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-slate-950">
+                ${product.price.toFixed(2)}
+              </span>
+              <span
+                className={`rounded-full px-2 py-1 text-[11px] font-medium ${
+                  product.stock > 0
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {product.stock > 0 ? `${product.stock} left` : "Out"}
+              </span>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
 
   const composer = (
-    <div
-      className={`mx-auto flex w-full max-w-3xl items-end gap-3 rounded-[28px] border px-4 py-3 backdrop-blur ${themeClasses.composer}`}
-    >
+    <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[30px] border border-slate-200 bg-white px-3 py-2 shadow-[0_18px_60px_rgba(15,23,42,0.12)]">
       <textarea
         value={input}
         onChange={(event) => setInput(event.target.value)}
@@ -228,52 +301,45 @@ export function ShopChatbot({
         }}
         placeholder={copy.placeholder}
         rows={1}
-        className={`max-h-40 min-h-[28px] flex-1 resize-none bg-transparent text-sm leading-7 outline-none ${themeClasses.input}`}
+        className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-6 text-slate-950 outline-none placeholder:text-slate-400"
       />
       <button
         type="button"
         onClick={submitCurrentInput}
-        disabled={loading}
-        className={`rounded-full px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${themeClasses.send}`}
+        disabled={loading || !input.trim()}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-lg font-semibold leading-none text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+        aria-label={copy.send}
       >
-        {copy.send}
+        ↑
       </button>
     </div>
   );
 
   const chatShell = (
-    <div className={`flex h-full min-h-0 flex-col ${themeClasses.shell}`}>
-      <div
-        className={`shrink-0 border-b px-4 py-4 sm:px-6 ${themeClasses.border}`}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p
-              className={`text-xs font-semibold uppercase tracking-[0.24em] ${themeClasses.muted}`}
-            >
-              {copy.eyebrow}
-            </p>
-            <h2 className={`mt-2 text-xl font-semibold ${themeClasses.strong}`}>
-              {businessName}
-            </h2>
+    <div className="flex h-full min-h-0 flex-col bg-white text-slate-950">
+      <div className="shrink-0 border-b border-slate-200 px-4 py-3 sm:px-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {onOpenInfo && (
+              <button
+                type="button"
+                onClick={onOpenInfo}
+                className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden"
+              >
+                {copy.info}
+              </button>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {copy.eyebrow}
+              </p>
+              <h2 className="mt-1 truncate text-lg font-semibold text-slate-950">
+                {businessName}
+              </h2>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setLanguage(language === "en" ? "my" : "en")}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${themeClasses.ghost}`}
-              aria-label={copy.language}
-            >
-              {language === "en" ? "MY" : "EN"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${themeClasses.ghost}`}
-              aria-label={copy.theme}
-            >
-              {theme === "light" ? "Dark" : "Light"}
-            </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {languageToggle}
             <div className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 sm:block">
               {copy.online}
             </div>
@@ -282,19 +348,13 @@ export function ShopChatbot({
       </div>
 
       {!hasStarted ? (
-        <div
-          className={`flex min-h-0 flex-1 items-center px-4 py-6 sm:px-6 ${themeClasses.panelSoft}`}
-        >
+        <div className="flex min-h-0 flex-1 items-center bg-slate-50/80 px-4 py-6 sm:px-6">
           <div className="mx-auto flex w-full max-w-3xl -translate-y-8 flex-col gap-5">
             <div className="text-center">
-              <h3
-                className={`text-2xl font-semibold sm:text-4xl ${themeClasses.strong}`}
-              >
+              <h3 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
                 {copy.greeting}
               </h3>
-              <p
-                className={`mx-auto mt-3 max-w-xl text-sm leading-6 sm:text-base ${themeClasses.muted}`}
-              >
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
                 {copy.helper}
               </p>
             </div>
@@ -307,45 +367,42 @@ export function ShopChatbot({
       ) : (
         <>
           <div
-            className={`min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 ${themeClasses.panelSoft}`}
+            ref={scrollRef}
+            className="chat-scrollbar min-h-0 flex-1 scroll-smooth overflow-y-auto overscroll-contain bg-slate-50/80 px-4 py-6 sm:px-6"
           >
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
               {messages.map((message, index) => (
-                <div
-                  key={`${message.role}-${index}`}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+                <div key={`${message.role}-${index}`} className="space-y-3">
                   <div
-                    className={`max-w-[90%] rounded-[28px] px-5 py-4 text-sm leading-7 shadow-sm sm:max-w-[80%] ${
-                      message.role === "user"
-                        ? themeClasses.user
-                        : themeClasses.assistant
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {message.content}
+                    <div
+                      className={`max-w-[92%] rounded-[26px] px-5 py-3 text-sm leading-7 shadow-sm sm:max-w-[78%] ${
+                        message.role === "user"
+                          ? "bg-slate-950 text-white"
+                          : "border border-slate-200 bg-white text-slate-800"
+                      }`}
+                    >
+                      {message.content}
+                    </div>
                   </div>
+                  {shouldShowProductCards(index) && productCards}
                 </div>
               ))}
 
               {loading && (
                 <div className="flex justify-start">
-                  <div
-                    className={`rounded-[28px] px-5 py-4 text-sm shadow-sm ${themeClasses.assistant}`}
-                  >
+                  <div className="rounded-[26px] border border-slate-200 bg-white px-5 py-3 text-sm text-slate-500 shadow-sm">
                     {copy.thinking}
                   </div>
                 </div>
               )}
-
-              <div ref={bottomRef} />
             </div>
           </div>
 
-          <div
-            className={`shrink-0 border-t px-4 py-3 backdrop-blur sm:px-6 ${themeClasses.border} ${themeClasses.panel}`}
-          >
+          <div className="shrink-0 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
             <div className="space-y-3">
               {promptBar}
               {composer}
