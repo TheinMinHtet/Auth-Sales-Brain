@@ -303,8 +303,8 @@ export function ShopChatbot({
 
   const composer = (
     <div
-      className={`mx-auto flex w-full max-w-3xl rounded-[28px] bg-[#202020] px-4 py-2.5 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] ${
-        composerExpanded ? "flex-col gap-1" : "items-end gap-2"
+      className={`mx-auto grid w-full max-w-3xl grid-cols-[1fr_auto] rounded-[28px] bg-[#202020] px-4 py-2.5 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] ${
+        composerExpanded ? "gap-x-2 gap-y-1" : "items-end gap-2"
       }`}
     >
       <textarea
@@ -322,13 +322,13 @@ export function ShopChatbot({
         }}
         placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
         rows={1}
-        className={`h-11 max-h-36 min-h-11 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px] ${
-          composerExpanded ? "w-full" : "flex-1"
-        }`}
+        className="col-start-1 h-11 max-h-36 min-h-11 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
       />
       <div
         className={
-          composerExpanded ? "flex w-full justify-end" : "mb-0.5 shrink-0"
+          composerExpanded
+            ? "col-start-2 row-start-2 flex justify-end"
+            : "col-start-2 row-start-1 mb-0.5"
         }
       >
         <button
