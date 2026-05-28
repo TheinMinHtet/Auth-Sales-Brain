@@ -33,9 +33,11 @@ function buildPromptSuggestions(shop: PublicShop) {
 }
 
 function ShopInfoPanel({ shop }: { shop: PublicShop }) {
+  const visibleProducts = shop.products.slice(0, 6);
+
   return (
     <>
-      <div className="border-b border-slate-200/80 px-6 py-6">
+      <div className="shrink-0 border-b border-slate-200/80 px-6 py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
           Sales Brain
         </p>
@@ -48,7 +50,7 @@ function ShopInfoPanel({ shop }: { shop: PublicShop }) {
         </p>
       </div>
 
-      <div className="chat-scrollbar min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
+      <div className="chat-scrollbar min-h-0 flex-1 overflow-y-auto px-6 py-6">
         <section>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -64,7 +66,7 @@ function ShopInfoPanel({ shop }: { shop: PublicShop }) {
                 No products published yet.
               </div>
             ) : (
-              shop.products.slice(0, 12).map((product) => (
+              visibleProducts.map((product) => (
                 <div
                   key={product.id}
                   className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3"
@@ -86,24 +88,29 @@ function ShopInfoPanel({ shop }: { shop: PublicShop }) {
               ))
             )}
           </div>
-        </section>
-
-        <section className="rounded-3xl bg-slate-950 px-5 py-5 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.25)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Store info
-          </p>
-          <div className="mt-4 space-y-4 text-sm">
-            <div>
-              <p className="text-slate-400">Payment</p>
-              <p className="mt-1 leading-6 text-slate-100">{shop.paymentInfo}</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Delivery</p>
-              <p className="mt-1 leading-6 text-slate-100">{shop.deliveryInfo}</p>
-            </div>
-          </div>
+          {shop.products.length > visibleProducts.length && (
+            <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-500">
+              Showing {visibleProducts.length} of {shop.products.length} products here. Ask by product name, budget, category, or stock to keep browsing fast.
+            </p>
+          )}
         </section>
       </div>
+
+      <section className="chat-scrollbar max-h-[34dvh] shrink-0 overflow-y-auto rounded-t-3xl bg-slate-950 px-5 py-5 text-slate-100 shadow-[0_-12px_36px_rgba(15,23,42,0.16)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          Store info
+        </p>
+        <div className="mt-4 space-y-4 text-sm">
+          <div>
+            <p className="text-slate-400">Payment</p>
+            <p className="mt-1 leading-6 text-slate-100">{shop.paymentInfo}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Delivery</p>
+            <p className="mt-1 leading-6 text-slate-100">{shop.deliveryInfo}</p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
