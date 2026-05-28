@@ -79,7 +79,9 @@ export function ShopChatbot({
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("en");
+  const [composerExpanded, setComposerExpanded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = messages.length > 0;
   const copy = language === "en" ? ENGLISH_COPY : MYANMAR_COPY;
 
@@ -147,6 +149,10 @@ export function ShopChatbot({
     if (!trimmed || loading) return;
 
     setInput("");
+    setComposerExpanded(false);
+    if (composerInputRef.current) {
+      composerInputRef.current.style.height = "44px";
+    }
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
     setLoading(true);
 
@@ -186,6 +192,13 @@ export function ShopChatbot({
 
   function submitCurrentInput() {
     void sendMessage(input);
+  }
+
+  function resizeComposerInput(textarea: HTMLTextAreaElement) {
+    textarea.style.height = "44px";
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 44), 144);
+    textarea.style.height = `${nextHeight}px`;
+    setComposerExpanded(nextHeight > 52);
   }
 
   const languageToggle = (
@@ -289,16 +302,17 @@ export function ShopChatbot({
   );
 
   const composer = (
-    <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[28px] bg-[#202020] px-4 py-3 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px]">
+    <div
+      className={`mx-auto flex w-full max-w-3xl rounded-[28px] bg-[#202020] px-4 py-2.5 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] ${
+        composerExpanded ? "flex-col gap-1" : "items-end gap-2"
+      }`}
+    >
       <textarea
+        ref={composerInputRef}
         value={input}
         onChange={(event) => {
           setInput(event.target.value);
-          event.currentTarget.style.height = "0px";
-          event.currentTarget.style.height = `${Math.min(
-            event.currentTarget.scrollHeight,
-            144
-          )}px`;
+          resizeComposerInput(event.currentTarget);
         }}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey) {
@@ -308,17 +322,25 @@ export function ShopChatbot({
         }}
         placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
         rows={1}
-        className="max-h-36 min-h-[44px] flex-1 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
+        className={`h-11 max-h-36 min-h-11 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px] ${
+          composerExpanded ? "w-full" : "flex-1"
+        }`}
       />
-      <button
-        type="button"
-        onClick={submitCurrentInput}
-        disabled={loading || !input.trim()}
-        className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:w-11"
-        aria-label={copy.send}
+      <div
+        className={
+          composerExpanded ? "flex w-full justify-end" : "mb-0.5 shrink-0"
+        }
       >
-        ↑
-      </button>
+        <button
+          type="button"
+          onClick={submitCurrentInput}
+          disabled={loading || !input.trim()}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:w-11"
+          aria-label={copy.send}
+        >
+          ↑
+        </button>
+      </div>
     </div>
   );
 
