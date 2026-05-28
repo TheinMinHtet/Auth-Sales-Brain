@@ -33,9 +33,9 @@ function buildPromptSuggestions(shop: PublicShop) {
 
 export function ShopStorefront({ shop }: { shop: PublicShop }) {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-4 lg:flex-row lg:px-6">
-        <aside className="flex w-full shrink-0 flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/75 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur lg:min-h-[calc(100vh-2rem)] lg:w-[320px]">
+    <div className="h-[100dvh] overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] text-slate-900">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-col gap-4 px-3 py-3 lg:flex-row lg:px-6 lg:py-4">
+        <aside className="hidden w-full shrink-0 flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white/75 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur lg:flex lg:h-full lg:w-[320px]">
           <div className="border-b border-slate-200/80 px-6 py-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Sales Brain
@@ -49,23 +49,7 @@ export function ShopStorefront({ shop }: { shop: PublicShop }) {
             </p>
           </div>
 
-          <div className="space-y-6 px-6 py-6">
-            <section>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Quick prompts
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {buildPromptSuggestions(shop).map((prompt) => (
-                  <div
-                    key={prompt}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600"
-                  >
-                    {prompt}
-                  </div>
-                ))}
-              </div>
-            </section>
-
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
             <section>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                 Product knowledge
@@ -118,7 +102,7 @@ export function ShopStorefront({ shop }: { shop: PublicShop }) {
           </div>
         </aside>
 
-        <main className="min-h-[calc(100vh-2rem)] flex-1 overflow-hidden rounded-[32px] border border-white/70 bg-white/85 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+        <main className="min-h-0 flex-1 overflow-hidden rounded-[28px] border border-white/70 bg-white/85 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur lg:rounded-[32px]">
           <ShopChatbot
             shopId={shop.shopId}
             businessName={shop.businessName}
