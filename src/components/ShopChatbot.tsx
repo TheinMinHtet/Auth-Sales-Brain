@@ -303,7 +303,7 @@ export function ShopChatbot({
 
   const composer = (
     <div
-      className={`mx-auto grid w-full max-w-3xl grid-cols-[1fr_auto] rounded-[28px] bg-[#202020] px-4 py-2.5 shadow-[0_18px_60px_rgba(15,23,42,0.18)] sm:rounded-[34px] ${
+      className={`mx-auto grid w-full max-w-3xl grid-cols-[1fr_auto] rounded-[28px] border border-slate-200 bg-white py-2.5 pl-6 pr-4 shadow-[0_18px_60px_rgba(15,23,42,0.12)] sm:rounded-[34px] sm:pl-7 ${
         composerExpanded ? "gap-x-2 gap-y-1" : "items-end gap-2"
       }`}
     >
@@ -322,7 +322,7 @@ export function ShopChatbot({
         }}
         placeholder={language === "en" ? "Ask anything" : "ဘာမဆို မေးပါ"}
         rows={1}
-        className="col-start-1 h-11 max-h-36 min-h-11 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-white outline-none placeholder:text-[#b8b8b8] sm:text-[20px]"
+        className="col-start-1 h-11 max-h-36 min-h-11 resize-none overflow-y-auto bg-transparent py-2 text-[18px] leading-7 text-slate-950 outline-none placeholder:text-slate-400 sm:text-[20px]"
       />
       <div
         className={
@@ -335,7 +335,7 @@ export function ShopChatbot({
           type="button"
           onClick={submitCurrentInput}
           disabled={loading || !input.trim()}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl font-medium leading-none text-[#141414] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:w-11"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-2xl font-medium leading-none text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:h-11 sm:w-11"
           aria-label={copy.send}
         >
           ↑
