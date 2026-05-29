@@ -4,7 +4,7 @@ export function buildShopContext(shop: ShopWithProducts): string {
   const productList = shop.products
     .filter((product) => product.isActive)
     .map((product) => {
-      const price = `$${product.price.toFixed(2)}`;
+      const price = `${product.price.toLocaleString()} MMK`;
       const stock =
         product.stock > 0 ? `${product.stock} in stock` : "out of stock";
 
@@ -19,9 +19,18 @@ export function buildShopContext(shop: ShopWithProducts): string {
     })
     .join("\n");
 
+  const strategyContext = [
+    shop.businessCategory?.length ? `Category: ${shop.businessCategory.join(", ")}` : null,
+    shop.targetAudience ? `Target Audience: ${shop.targetAudience}` : null,
+    shop.ageGroup ? `Age Group: ${shop.ageGroup}` : null,
+    shop.businessGoal ? `Business Goal: ${shop.businessGoal}` : null,
+  ].filter(Boolean).join("\n");
+
   return [
     `BUSINESS: ${shop.businessName}`,
+    shop.ownerName ? `OWNER: ${shop.ownerName}` : null,
     shop.description ? `DESCRIPTION: ${shop.description}` : null,
+    strategyContext ? `\nSTRATEGY:\n${strategyContext}` : null,
     "",
     "PRODUCTS:",
     productList || "No products listed yet.",

@@ -143,6 +143,7 @@ export function buildKnowledgeDocuments(shop: ShopWithProducts): KnowledgeDocume
       title: `${shop.businessName} overview`,
       content: [
         `Business name: ${shop.businessName}`,
+        shop.ownerName ? `Owner: ${shop.ownerName}` : null,
         shop.description ? `Description: ${shop.description}` : null,
         `Active products: ${shop.products.filter((product) => product.isActive).length}`,
       ]
@@ -150,6 +151,21 @@ export function buildKnowledgeDocuments(shop: ShopWithProducts): KnowledgeDocume
         .join("\n"),
       metadata: {
         businessName: shop.businessName,
+      },
+    },
+    {
+      sourceId: `${shop.shopId}:strategy`,
+      sourceType: "shop_overview",
+      title: `${shop.businessName} business strategy`,
+      content: [
+        shop.businessCategory?.length ? `Category: ${shop.businessCategory.join(", ")}` : null,
+        shop.targetAudience ? `Target Audience: ${shop.targetAudience}` : null,
+        shop.ageGroup ? `Age Group: ${shop.ageGroup}` : null,
+        shop.businessGoal ? `Business Goal: ${shop.businessGoal}` : null,
+        shop.challenges ? `Challenges: ${shop.challenges}` : null,
+      ].filter(Boolean).join("\n"),
+      metadata: {
+        isStrategy: true
       },
     },
     {

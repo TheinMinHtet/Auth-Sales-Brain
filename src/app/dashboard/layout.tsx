@@ -69,7 +69,14 @@ function DashboardLayoutContent({
 
           const setupPayload = {
             businessName: profile.shopName,
-            description: `A premium shop specializing in ${profile.businessCategory.join(", ")}. Targeted at ${profile.customers.join(", ")}. Business Goal: ${profile.businessGoal}.`,
+            ownerName: profile.ownerName,
+            description: `A premium shop specializing in ${profile.businessCategory.join(", ")}.`,
+            businessCategory: profile.businessCategory,
+            targetAudience: profile.customers.join(", "),
+            ageGroup: profile.ageGroup,
+            businessGoal: profile.businessGoal,
+            challenges: profile.businessChallenge,
+            marketingMethods: profile.marketingMethods,
             paymentInfo: profile.paymentInfo,
             deliveryInfo: profile.deliveryInfo,
             botTone: "friendly",

@@ -2,7 +2,17 @@ import { z } from "zod";
 
 export const shopSetupSchema = z.object({
   businessName: z.string().min(2),
+  ownerName: z.string().optional(),
   description: z.string().optional(),
+  
+  // Strategy fields
+  businessCategory: z.array(z.string()).optional(),
+  targetAudience: z.string().optional(),
+  ageGroup: z.string().optional(),
+  businessGoal: z.string().optional(),
+  challenges: z.string().optional(),
+  marketingMethods: z.array(z.string()).optional(),
+  
   paymentInfo: z.string().min(5),
   deliveryInfo: z.string().min(5),
   faq: z.string().optional(),

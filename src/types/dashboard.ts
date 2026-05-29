@@ -60,6 +60,15 @@ export interface ShopConfig {
   ownerName: string;
   phone: string;
   currency: string;
+  
+  // Strategy fields
+  businessCategory?: string[];
+  targetAudience?: string;
+  ageGroup?: string;
+  businessGoal?: string;
+  challenges?: string;
+  marketingMethods?: string[];
+  
   telegramBotToken: string;
   telegramBotUsername: string;
   messengerPageAccessToken: string;
