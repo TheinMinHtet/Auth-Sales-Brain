@@ -6,6 +6,7 @@ import { dict } from "@/types/constants";
 
 interface DashboardContextType {
   storeState: SystemState | null;
+  setStoreState: React.Dispatch<React.SetStateAction<SystemState | null>>;
   lang: "en" | "my";
   setLang: (lang: "en" | "my") => void;
   t: (key: keyof typeof dict['en']) => any;
@@ -39,7 +40,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         messengerVerifyToken: "",
         messengerBotId: "",
         messengerBotName: "",
-        onboardingCompleted: true
+        onboardingCompleted: false
       },
       products: [],
       deliveryZones: [],
@@ -54,7 +55,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <DashboardContext.Provider value={{ storeState, lang, setLang, t, loading, refreshState }}>
+    <DashboardContext.Provider value={{ storeState, setStoreState, lang, setLang, t, loading, refreshState }}>
       {children}
     </DashboardContext.Provider>
   );

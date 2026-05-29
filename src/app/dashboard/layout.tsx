@@ -14,13 +14,15 @@ import { DashboardProvider, useDashboard } from "./DashboardContext";
 
 import { TelegramSimulator } from "@/components/dashboard/TelegramSimulator";
 import { TelegramSession } from "@/types/dashboard";
+import { LogoutButton } from "@/components/LogoutButton";
+import { Onboarding } from "@/components/dashboard/Onboarding";
 
 function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { storeState, lang, setLang, t, refreshState } = useDashboard();
+  const { storeState, setStoreState, lang, setLang, t, refreshState } = useDashboard();
   const [showSimulator, setShowSimulator] = useState<boolean>(false);
   const pathname = usePathname();
 
@@ -51,6 +53,32 @@ function DashboardLayoutContent({
 
   if (!storeState) return null;
 
+  // Onboarding Intercept
+  if (!storeState.config.onboardingCompleted) {
+    return (
+      <Onboarding
+        lang={lang}
+        initialShopName={storeState.config.shopName}
+        initialOwnerName={storeState.config.ownerName}
+        onLangChange={setLang}
+        onComplete={async (profile) => {
+          setStoreState((prev) => 
+            prev ? {
+              ...prev,
+              config: {
+                ...prev.config,
+                shopName: profile.shopName,
+                ownerName: profile.ownerName,
+                onboardingCompleted: true
+              }
+            } : prev
+          );
+          // Optional: persist to backend here if needed
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f0f9ff] text-slate-900 font-sans flex flex-col selection:bg-sky-500 selection:text-white pb-12 relative overflow-hidden">
       
@@ -80,6 +108,17 @@ function DashboardLayoutContent({
         <div className="flex flex-wrap items-center justify-center gap-3">
           
           <button
+            onClick={() => {
+              setStoreState((prev) => 
+                prev ? {
+                  ...prev,
+                  config: {
+                    ...prev.config,
+                    onboardingCompleted: false
+                  }
+                } : prev
+              );
+            }}
             className="flex items-center gap-1.5 text-[9px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 p-1.5 px-3 rounded-lg border border-indigo-200 transition-colors cursor-pointer"
           >
             <Edit2 size={11} className="text-indigo-600 animate-pulse" />
@@ -130,6 +169,9 @@ function DashboardLayoutContent({
               <ExternalLink size={10} className="opacity-70" />
             </a>
           )}
+
+          <div className="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
+          <LogoutButton className="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold hover:bg-slate-200 transition-colors" />
         </div>
       </header>
 
