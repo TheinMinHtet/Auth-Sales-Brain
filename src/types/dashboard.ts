@@ -54,6 +54,8 @@ export interface ChatMessage {
 }
 
 export interface ShopConfig {
+  shopId?: string;
+  publicUrl?: string;
   shopName: string;
   ownerName: string;
   phone: string;

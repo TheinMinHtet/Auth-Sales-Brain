@@ -30,6 +30,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     // For now, use mock data
     setStoreState({
       config: {
+        shopId: "demo-shop-123",
+        publicUrl: "http://localhost:3000/shop/demo-shop-123",
         shopName: "Sample Shop",
         ownerName: "Owner",
         phone: "09123456789",

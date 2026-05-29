@@ -37,6 +37,31 @@ export default function ConfigPage() {
 
         {botConnectionTab === "telegram" && (
           <div className="mt-6 space-y-4">
+             {storeState.config.publicUrl && (
+               <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 space-y-2">
+                 <label className="text-[9px] font-bold text-sky-600 uppercase flex items-center gap-1.5">
+                   <ExternalLink size={10} /> {t("shopLink") || "Your Shop Link"}
+                 </label>
+                 <div className="flex items-center gap-2">
+                   <input 
+                     readOnly 
+                     value={storeState.config.publicUrl} 
+                     className="flex-1 bg-white border border-sky-200 rounded-lg p-2 text-[10px] font-mono text-slate-700"
+                   />
+                   <a 
+                     href={storeState.config.publicUrl} 
+                     target="_blank" 
+                     className="bg-black text-white p-2 rounded-lg hover:bg-slate-800 transition-colors"
+                   >
+                     <ExternalLink size={14} />
+                   </a>
+                 </div>
+                 <p className="text-[9px] text-sky-500 italic">
+                   Share this link with your customers to start selling!
+                 </p>
+               </div>
+             )}
+
              <div className="space-y-1">
                 <label className="text-[9px] font-semibold text-slate-400 uppercase block">{t("storeNameLabel")}</label>
                 <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono" defaultValue={storeState.config.shopName} />

@@ -157,6 +157,26 @@ function DashboardLayoutContent({
             <span>{showSimulator ? t("closeSimulatorButton") : t("viewSimulatorButton")}</span>
           </button>
 
+          {storeState.config.shopId ? (
+            <a
+              href={storeState.config.publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-white border border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-slate-700 flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer"
+            >
+              <ExternalLink size={11} className="text-sky-600" />
+              <span>{t("viewShop") || "View Shop"}</span>
+            </a>
+          ) : (
+            <Link
+              href="/setup"
+              className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+            >
+              <TrendingUp size={11} />
+              <span>{lang === "my" ? "ဆိုင်စတင်တည်ဆောက်ရန်" : "Set up Shop Link"}</span>
+            </Link>
+          )}
+
           {storeState.config.telegramBotUsername && (
             <a
               href={`https://t.me/${storeState.config.telegramBotUsername.replace("@", "")}`}
