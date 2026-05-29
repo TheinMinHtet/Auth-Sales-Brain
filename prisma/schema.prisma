@@ -25,25 +25,32 @@ model User {
 }
 
 model Shop {
-  id              String    @id @default(cuid())
-  shopId          String    @unique
-  businessName    String
-  description     String?
-  paymentInfo     String
-  deliveryInfo    String
-  faq             String?
-  policies        String?
-  botSystemPrompt String?
-  botTone         String    @default("friendly")
-  isActive        Boolean   @default(true)
-  ownerId         String    @unique
-  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  products        Product[]
-  orders          Order[]
-  chatSessions    ChatSession[]
-  analytics       ShopAnalytics[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  shopId           String    @unique
+  businessName     String
+  ownerName        String?
+  description      String?
+  businessCategory String[]
+  targetAudience   String?
+  ageGroup         String?
+  businessGoal     String?
+  challenges       String?
+  marketingMethods String[]
+  paymentInfo      String
+  deliveryInfo     String
+  faq              String?
+  policies         String?
+  botSystemPrompt  String?
+  botTone          String    @default("friendly")
+  isActive         Boolean   @default(true)
+  ownerId          String    @unique
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products         Product[]
+  orders           Order[]
+  chatSessions     ChatSession[]
+  analytics        ShopAnalytics[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([shopId])
 }
