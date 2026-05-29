@@ -26,31 +26,68 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refreshState = async () => {
-    // TODO: Connect database later
-    // For now, use mock data
-    const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-    setStoreState({
-      config: {
-        shopId: "demo-shop-123",
-        publicUrl: `${baseUrl}/shop/demo-shop-123`,
-        shopName: "Sample Shop",
-        ownerName: "Owner",
-        phone: "09123456789",
-        currency: "MMK",
-        telegramBotToken: "",
-        telegramBotUsername: "sample_bot",
-        messengerPageAccessToken: "",
-        messengerVerifyToken: "",
-        messengerBotId: "",
-        messengerBotName: "",
-        onboardingCompleted: false
-      },
-      products: [],
-      deliveryZones: [],
-      orders: [],
-      sessions: {}
-    });
-    setLoading(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/shops/me");
+      const data = await res.json();
+      
+      if (data.shop) {
+        setStoreState({
+          config: {
+            shopId: data.shop.shopId,
+            publicUrl: data.shop.publicUrl,
+            shopName: data.shop.businessName,
+            ownerName: data.shop.ownerName || "Owner", // Fallback if missing
+            phone: data.shop.phone || "",
+            currency: "MMK",
+            telegramBotToken: data.shop.telegramBotToken || "",
+            telegramBotUsername: data.shop.telegramBotUsername || "",
+            messengerPageAccessToken: "",
+            messengerVerifyToken: "",
+            messengerBotId: "",
+            messengerBotName: "",
+            onboardingCompleted: true // If shop exists, onboarding is done
+          },
+          products: data.shop.products.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            category: "General",
+            price: p.price,
+            description: p.description || "",
+            stock: p.stock,
+            image: p.imageUrl || ""
+          })),
+          deliveryZones: [],
+          orders: [],
+          sessions: {}
+        });
+      } else {
+        // Fallback to initial state for onboarding
+        setStoreState({
+          config: {
+            shopName: "Sample Shop",
+            ownerName: "Owner",
+            phone: "",
+            currency: "MMK",
+            telegramBotToken: "",
+            telegramBotUsername: "",
+            messengerPageAccessToken: "",
+            messengerVerifyToken: "",
+            messengerBotId: "",
+            messengerBotName: "",
+            onboardingCompleted: false
+          },
+          products: [],
+          deliveryZones: [],
+          orders: [],
+          sessions: {}
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch shop state:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

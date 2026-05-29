@@ -62,6 +62,7 @@ function DashboardLayoutContent({
         initialOwnerName={storeState.config.ownerName}
         onLangChange={setLang}
         onComplete={async (profile) => {
+          // In a real app, we'd save the profile to DB here
           setStoreState((prev) => 
             prev ? {
               ...prev,
@@ -73,10 +74,34 @@ function DashboardLayoutContent({
               }
             } : prev
           );
-          // Optional: persist to backend here if needed
         }}
       />
     );
+  }
+
+  // If onboarding is done but no shopId (real DB record) exists, redirect or show setup
+  if (!storeState.config.shopId && pathname !== "/dashboard/config") {
+     return (
+       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+         <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full shadow-xl text-center space-y-6">
+           <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">
+             🚀
+           </div>
+           <div className="space-y-2">
+             <h2 className="text-xl font-bold text-slate-900">Strategy Confirmed!</h2>
+             <p className="text-sm text-slate-500 leading-relaxed">
+               Your AI business strategy is ready. Now, let's create your technical shop link to start selling.
+             </p>
+           </div>
+           <Link 
+             href="/setup" 
+             className="block w-full bg-black hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md"
+           >
+             Generate My Shop Link
+           </Link>
+         </div>
+       </div>
+     );
   }
 
   return (
