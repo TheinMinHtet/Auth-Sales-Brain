@@ -29,10 +29,13 @@ function DashboardLayoutContent({
     sessionId: "mock-session",
     customerName: "Mock Customer",
     customerPhone: "091234567",
+    customerTelegramId: "12345678",
     messages: [
       { id: "1", sender: "system", content: "Bot started", timestamp: new Date().toISOString() }
     ],
+    lastActive: new Date().toISOString(),
     currentStep: "browsing",
+    cart: [],
     liveTakeoverActive: false
   };
 
