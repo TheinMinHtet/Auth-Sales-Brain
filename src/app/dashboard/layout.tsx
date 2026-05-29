@@ -62,18 +62,58 @@ function DashboardLayoutContent({
         initialOwnerName={storeState.config.ownerName}
         onLangChange={setLang}
         onComplete={async (profile) => {
-          // In a real app, we'd save the profile to DB here
-          setStoreState((prev) => 
-            prev ? {
-              ...prev,
-              config: {
-                ...prev.config,
-                shopName: profile.shopName,
-                ownerName: profile.ownerName,
-                onboardingCompleted: true
+          // Generate a default kickoff product based on category
+          const kickoffProductName = profile.businessCategory[0] 
+            ? `${profile.businessCategory[0]} Essential` 
+            : "Kickoff Product";
+
+          const setupPayload = {
+            businessName: profile.shopName,
+            description: `A premium shop specializing in ${profile.businessCategory.join(", ")}. Targeted at ${profile.customers.join(", ")}. Business Goal: ${profile.businessGoal}.`,
+            paymentInfo: profile.paymentInfo,
+            deliveryInfo: profile.deliveryInfo,
+            botTone: "friendly",
+            products: [
+              {
+                name: kickoffProductName,
+                description: `Our signature ${kickoffProductName} to get you started!`,
+                price: 15000,
+                stock: 50,
+                imageUrl: ""
               }
-            } : prev
-          );
+            ]
+          };
+
+          try {
+            const res = await fetch("/api/shops/setup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(setupPayload)
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.shop) {
+              // Successfully created shop in DB!
+              // refreshState will fetch the real record
+              await refreshState();
+            } else {
+              console.error("Setup failed during onboarding:", data.error);
+              // Fallback to local state if API fails
+              setStoreState((prev) => 
+                prev ? {
+                  ...prev,
+                  config: {
+                    ...prev.config,
+                    shopName: profile.shopName,
+                    ownerName: profile.ownerName,
+                    onboardingCompleted: true
+                  }
+                } : prev
+              );
+            }
+          } catch (error) {
+            console.error("Error creating shop during onboarding:", error);
+          }
         }}
       />
     );

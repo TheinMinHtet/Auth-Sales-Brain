@@ -39,6 +39,8 @@ export interface OnboardingProfile {
   businessChallenge: string;
   marketingMethods: string[];
   businessGoal: string;
+  paymentInfo: string;
+  deliveryInfo: string;
 }
 
 interface OnboardingProps {
@@ -56,7 +58,7 @@ export function Onboarding({
   initialOwnerName = "",
   onLangChange
 }: OnboardingProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 4 is loading/AI synthesis step, followed by the Summary Page
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1); // 4 is Payment/Delivery, 5 is loading/AI
   const [profile, setProfile] = useState<OnboardingProfile>({
     shopName: initialShopName || "Shwe Pathein Sweet Treats",
     ownerName: initialOwnerName || "Yoon Yamone Oo",
@@ -67,7 +69,9 @@ export function Onboarding({
     customerValues: [],
     businessChallenge: "",
     marketingMethods: [],
-    businessGoal: ""
+    businessGoal: "",
+    paymentInfo: "Bank Transfer / KPay / WavePay",
+    deliveryInfo: "Standard Delivery (Yangon)"
   });
 
   const [loadingSummary, setLoadingSummary] = useState<boolean>(false);
@@ -184,12 +188,22 @@ export function Onboarding({
         profile.businessGoal !== ""
       );
     }
+    if (step === 4) {
+      return (
+        profile.paymentInfo.trim().length >= 5 &&
+        profile.deliveryInfo.trim().length >= 5
+      );
+    }
     return true;
   };
 
   // Submit profile answers to backend, generate summary using Gemini
   const handleFinalSubmit = async () => {
-    onComplete(profile, "Initial onboarding profile saved! Feel free to request customized smart marketing campaigns or re-evaluate core strategy inside the AI Advisor Desk.");
+    setStep(5);
+    // Simulation of AI Processing
+    setTimeout(() => {
+       onComplete(profile, "Initial onboarding profile saved! Feel free to request customized smart marketing campaigns or re-evaluate core strategy inside the AI Advisor Desk.");
+    }, 2000);
   };
 
   // Step names localization
@@ -199,6 +213,7 @@ export function Onboarding({
         case 1: return "လုပ်ငန်းသတင်းအချက်အလက်";
         case 2: return "ဝယ်ယူသူဦးတည်ချက်";
         case 3: return "အရောင်းနှင့် မားကက်တင်း မဟာဗျူဟာ";
+        case 4: return "ငွေပေးချေမှုနှင့် ပို့ဆောင်ရေး";
         default: return "အချက်အလက် စီစစ်တွက်ချက်ခြင်း";
       }
     } else {
@@ -206,6 +221,7 @@ export function Onboarding({
         case 1: return "Business Information";
         case 2: return "Customer Information";
         case 3: return "Sales & Marketing";
+        case 4: return "Payment & Delivery";
         default: return "Cognitive Processing";
       }
     }
@@ -330,7 +346,7 @@ export function Onboarding({
             </div>
 
             <div className="text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md shrink-0">
-              {lang === "my" ? `အဆင့် ${step} / ၃` : `Step ${step} of 3`}
+              {lang === "my" ? `အဆင့် ${step} / ၄` : `Step ${step} of 4`}
             </div>
           </div>
 
@@ -340,7 +356,7 @@ export function Onboarding({
                 {currentStepLabel()}
               </h1>
               <span className="text-[10px] font-bold text-indigo-500 font-mono">
-                {Math.round(((step - 1) / 3) * 100)}% Completed
+                {Math.round(((step - 1) / 4) * 100)}% Completed
               </span>
             </div>
 
@@ -348,7 +364,7 @@ export function Onboarding({
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex border border-slate-200/20">
               <div
                 className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 transition-all duration-500 ease-out"
-                style={{ width: `${(step / 3) * 100}%` }}
+                style={{ width: `${(step / 4) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -698,6 +714,43 @@ export function Onboarding({
 
             {step === 4 && (
               <motion.div
+                key="step-4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8 flex-1 flex flex-col justify-center"
+              >
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-extrabold text-slate-400 uppercase block tracking-wider">
+                      {lang === "my" ? "ငွေပေးချေမှု အချက်အလက် (ဘဏ်စာရင်း သို့မဟုတ် ဖုန်းနံပါတ်)" : "Payment Information (Bank, KPay, or WavePay)"}
+                    </label>
+                    <textarea
+                      value={profile.paymentInfo}
+                      onChange={(e) => setProfile({ ...profile, paymentInfo: e.target.value })}
+                      placeholder={lang === "my" ? "ဥပမာ - KPay: 09123456789" : "e.g., KPay: 09123456789 (Name: Mg Mg)"}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono font-extrabold text-slate-400 uppercase block tracking-wider">
+                      {lang === "my" ? "ပို့ဆောင်ရေး အချက်အလက်" : "Delivery Information"}
+                    </label>
+                    <textarea
+                      value={profile.deliveryInfo}
+                      onChange={(e) => setProfile({ ...profile, deliveryInfo: e.target.value })}
+                      placeholder={lang === "my" ? "ဥပမာ - ရန်ကုန်မြို့တွင်း ၂ ရက်အတွင်း ပို့ဆောင်ပေးပါသည်" : "e.g., Delivery within 2 days in Yangon."}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none min-h-[100px]"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 5 && (
+              <motion.div
                 key="step-loading"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -724,7 +777,7 @@ export function Onboarding({
           </AnimatePresence>
 
           {/* Stepper Footer Rules Actions */}
-          {step < 4 && (
+          {step < 5 && (
             <div className="flex items-center justify-between pt-6 border-t border-slate-100 mt-6 shrink-0">
               <button
                 type="button"
@@ -740,7 +793,7 @@ export function Onboarding({
                 type="button"
                 disabled={!isStepValid()}
                 onClick={() => {
-                  if (step === 3) {
+                  if (step === 4) {
                     handleFinalSubmit();
                   } else {
                     setStep((prev) => (prev + 1) as any);
@@ -752,7 +805,7 @@ export function Onboarding({
                     : "bg-slate-200 text-slate-400 cursor-not-allowed"
                 }`}
               >
-                <span>{step === 3 ? (lang === "my" ? "အချက်အလက်သိမ်းဆည်းပြီး ဝင်မည်" : "Finish & Enter Dashboard") : (lang === "my" ? "ရှေ့သို့" : "Next")}</span>
+                <span>{step === 4 ? (lang === "my" ? "ဆိုင်လင့်ခ်ဖန်တီးပြီး ဝင်မည်" : "Generate Link & Enter") : (lang === "my" ? "ရှေ့သို့" : "Next")}</span>
                 <ArrowRight size={12} />
               </button>
             </div>
