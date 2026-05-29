@@ -28,10 +28,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const refreshState = async () => {
     // TODO: Connect database later
     // For now, use mock data
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
     setStoreState({
       config: {
         shopId: "demo-shop-123",
-        publicUrl: "http://localhost:3000/shop/demo-shop-123",
+        publicUrl: `${baseUrl}/shop/demo-shop-123`,
         shopName: "Sample Shop",
         ownerName: "Owner",
         phone: "09123456789",
